@@ -1,0 +1,4 @@
+#include "resource.h"
+
+IDI_MYICON ICON "icon.ico"
+IDR_MUSIC  RCDATA "music.ogg"
