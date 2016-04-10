@@ -9,6 +9,10 @@ Dependencies (ubuntu):
 </code>
 
 <code>
+	git clone https://github.com/Freelan/snakelike.git && cd snakelike
+</code>
+<br>
+<code>
 	make all
 </code>
 <br>
