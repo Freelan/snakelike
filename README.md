@@ -1,7 +1,7 @@
 # snakelike
-Simple snake game.
+A simple snake game.
 
-Dependencies (ubuntu):
+<b>Dependencies </b>(ubuntu):
 <br>
 <code>
 	libsfml-dev
@@ -11,12 +11,14 @@ Dependencies (ubuntu):
 	libncurses5-dev
 </code>
 
+<b>Installation</>
+<br>
 <code>
 	git clone https://github.com/Freelan/snakelike.git && cd snakelike
 </code>
 <br>
 <code>
-	make all
+	make
 </code>
 <br>
 <code>
