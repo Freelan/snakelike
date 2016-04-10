@@ -1,7 +1,7 @@
 # snakelike
 Simple snake game.
 
-[code]
+<code>
 	make all
 	./snakelike
-[/code]
+</code>
