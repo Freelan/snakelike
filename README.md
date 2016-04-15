@@ -11,7 +11,7 @@ A simple snake game.
 	libncurses5-dev
 </code>
 
-<b>Installation</>
+<b>Installation</b>
 <br>
 <code>
 	git clone https://github.com/Freelan/snakelike.git && cd snakelike
