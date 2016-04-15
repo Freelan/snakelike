@@ -20,7 +20,7 @@ class snake
         int tempY;
         int direction = 0;
         int snakeLength = 1;
-        int delay = 130;
+        int delay = 100;
         std::vector <int> segmentPositionY;
         std::vector <int> segmentPositionX;
 
