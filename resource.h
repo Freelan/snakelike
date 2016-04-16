@@ -1,0 +1,7 @@
+#ifndef RESOURCE_H_INCLUDED
+#define RESOURCE_H_INCLUDED
+
+#define IDI_MYICON  101
+#define IDR_MUSIC   256
+
+#endif // RESOURCE_H_INCLUDED
