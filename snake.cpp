@@ -1,6 +1,8 @@
 #include <curses.h>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <algorithm>
 #include <ctime>
 #include <cstdlib>
 
@@ -66,10 +68,10 @@ snake::~snake()
 void snake::gameOver()
 {
     clear();
-    centeredmvprintw( 3, "K O N I E C  G R Y\n\n" );
-    std::string score = "Twoj wynik: " + std::to_string( segmentPositionY.size() );
-    centeredmvprintw( 6, score );
-    centeredmvprintw( 23, "[q] wyjscie\n" );
+    centeredmvprintw( 3, "GAME OVER\n\n" );
+    int score = segmentPositionY.size();
+    centeredmvprintw( 6, "Your score: " + std::to_string(score) );
+    centeredmvprintw( 23, "[q] quit\n" );
     refresh();
 
     flash();
