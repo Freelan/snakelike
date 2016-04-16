@@ -1,7 +1,9 @@
 #include <curses.h>
+#include <string>
 #include <vector>
 #include <ctime>
 #include <cstdlib>
+
 #include "snake.h"
 
 int getx()
@@ -32,6 +34,12 @@ int getMaxY()
     return tempy;
 }
 
+void centeredmvprintw( int y, std::string String )
+{
+    int x = getMaxX()/2 - String.length()/2;
+    mvprintw( y, x, String.c_str() );
+}
+
 void printFood()
 {
     srand( time( 0 ) );
@@ -58,9 +66,10 @@ snake::~snake()
 void snake::gameOver()
 {
     clear();
-    mvprintw( 3, 31, "K O N I E C  G R Y\n\n" );
-    mvprintw( 6, 33, "Twoj wynik: %d", segmentPositionY.size() );
-    mvprintw( 23, 34, "[q] wyjscie\n" );
+    centeredmvprintw( 3, "K O N I E C  G R Y\n\n" );
+    std::string score = "Twoj wynik: " + std::to_string( segmentPositionY.size() );
+    centeredmvprintw( 6, score );
+    centeredmvprintw( 23, "[q] wyjscie\n" );
     refresh();
 
     flash();
