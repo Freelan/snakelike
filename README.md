@@ -10,7 +10,7 @@ A simple snake game.
 <b>Installation</b>
 <br>
 <code>
-	git clone https://github.com/Freelan/snakelike.git && cd snakelike
+	git clone https://github.com/hjaremko/snakelike.git && cd snakelike
 </code>
 <br>
 <code>
