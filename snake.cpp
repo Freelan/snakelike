@@ -6,7 +6,7 @@
 #include <ctime>
 #include <cstdlib>
 
-#include "snake.h"
+#include "Snake.hpp"
 
 int getx()
 {
@@ -53,19 +53,19 @@ void printFood()
     mvprintw( randY, randX, "*" );
 }
 
-snake::snake()
+Snake::Snake()
 {
     segmentPositionX.resize( snakeLength+1 );
     segmentPositionY.resize( snakeLength+1 );
     //ctor
 }
 
-snake::~snake()
+Snake::~Snake()
 {
     //dtor
 }
 
-void snake::gameOver()
+void Snake::gameOver()
 {
     clear();
     centeredmvprintw( 3, "GAME OVER\n\n" );
@@ -88,7 +88,7 @@ void snake::gameOver()
 //    exit(0);
 }
 
-void snake::grow()
+void Snake::grow()
 {
     if( mvinch( y, x ) == 42 ){
         flash();
@@ -100,7 +100,7 @@ void snake::grow()
     }
 }
 
-void snake::movement()
+void Snake::movement()
 {
     char Char;
 

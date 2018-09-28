@@ -4,10 +4,6 @@ A simple snake game.
 <b>Dependencies </b>(ubuntu):
 <br>
 <code>
-	libsfml-dev
-</code>
-<br>
-<code>
 	libncurses5-dev
 </code>
 
