@@ -1,208 +1,162 @@
-#include <curses.h>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <algorithm>
-#include <ctime>
-#include <cstdlib>
-
 #include "Snake.hpp"
 
-int getx()
-{
-    int tempx, tempy;
-    getyx( stdscr, tempy, tempx );
-    return tempx;
-}
+const char Snake::FULL_SEGMENT;
 
-int gety()
+Segment::Direction opposite( Segment::Direction t_direction )
 {
-    int tempx, tempy;
-    getyx( stdscr, tempy, tempx );
-    return tempy;
-}
-
-int getMaxX()
-{
-    int tempx, tempy;
-    getmaxyx( stdscr, tempy, tempx );
-    return tempx;
-}
-
-int getMaxY()
-{
-    int tempx, tempy;
-    getmaxyx( stdscr, tempy, tempx );
-    return tempy;
-}
-
-void centeredmvprintw( int y, std::string String )
-{
-    int x = getMaxX()/2 - String.length()/2;
-    mvprintw( y, x, String.c_str() );
-}
-
-void printFood()
-{
-    srand( time( 0 ) );
-    int randX = ( rand() % getMaxX()-3 ) + 3;
-    int randY = ( rand() % getMaxY()-3 ) + 3;
-    if( mvinch( randY, randX ) == 35 )  { //#
-        printFood();
+    switch ( t_direction )
+    {
+        case Segment::Direction::Left:
+            return Segment::Direction::Right;
+        case Segment::Direction::Right:
+            return Segment::Direction::Left;
+        case Segment::Direction::Up:
+            return Segment::Direction::Down;
+        case Segment::Direction::Down:
+            return Segment::Direction::Up;
     }
-    mvprintw( randY, randX, "*" );
+}
+
+void centeredmvprintw( int y, std::string t_string )
+{
+    int x = getmaxx( stdscr ) / 2 - t_string.length() / 2;
+    mvprintw( y, x, t_string.c_str() );
 }
 
 Snake::Snake()
 {
-    segmentPositionX.resize( snakeLength+1 );
-    segmentPositionY.resize( snakeLength+1 );
-    //ctor
-}
+    m_segments.emplace_back( 5, 5, '#' );
+} //ctor
+
+Snake::Snake( std::vector<Food>* t_foods ) : m_foods( t_foods )
+{
+    for ( int i = 0; i < 4; ++i )
+    {
+        m_segments.emplace_back( 5, 5 + i, '#' );
+    }
+} //ctor
 
 Snake::~Snake()
 {
-    //dtor
-}
+
+} //dtor
 
 void Snake::gameOver()
 {
     clear();
+    int score = m_segments.size();
+    
     centeredmvprintw( 3, "GAME OVER\n\n" );
-    int score = segmentPositionY.size();
-    centeredmvprintw( 6, "Your score: " + std::to_string(score) );
+    centeredmvprintw( 6, "Your score: " + std::to_string( score ) );
     centeredmvprintw( 23, "[q] quit\n" );
     refresh();
 
     flash();
-    napms(50);
+    napms( 50 );
     flash();
-    napms(50);
+    napms( 50 );
     flash();
-    napms(50);
+    napms( 50 );
 
-    while( getch() != 'q' ) {}
-
-    over = true;
-//    endwin();
-//    exit(0);
+    while ( getch() != 'q' ) {}
 }
 
-void Snake::grow()
+void Snake::grow( auto t_point, Segment::Direction t_direction )
 {
-    if( mvinch( y, x ) == 42 ){
-        flash();
-        snakeLength++;
-        segmentPositionX.resize( snakeLength+1 );
-        segmentPositionY.resize( snakeLength+1 );
-        printFood();
-        //delay -= 5;
+    m_segments.emplace_back( t_point, FULL_SEGMENT );
+    m_segments.back().move( t_direction );
+}
+
+void Snake::movementLoop()
+{
+    nodelay( stdscr, TRUE );
+    char ch = ' ';
+    auto currentDirection = Segment::Direction::Right;
+
+    while ( move( currentDirection ) )
+    {
+        ch = getch();
+
+        if ( ch == 'a' || ch == 'd' || ch == 'w' || ch == 's' )
+        {
+            auto newDirection = static_cast<Segment::Direction>( ch );
+
+            if ( currentDirection != opposite( newDirection ) )
+            {
+                currentDirection = newDirection;
+            }
+        }
+
+        napms( m_delay );
+    }
+
+    m_over = true;
+    return;
+}
+
+void Snake::display() const
+{
+    for ( auto& segment : m_segments )
+    {
+        segment.display();
     }
 }
 
-void Snake::movement()
+void Snake::displayFoods() const
 {
-    char Char;
-
-    nodelay( stdscr,TRUE );
-
-    while( (Char = getch()) < 0  && over != true)
+    for ( auto food : *m_foods )
     {
-//        mvprintw( 0, 0, "                                                            ");
-//        mvprintw( 0, 0, "i: %d, x: %d, y: %d, segY: %d, segX: %d, dir: %d, segx0: %d, segy0: %d",
-//                  i+1, x, y, segmentPositionY.size(), segmentPositionX.size(), direction, segmentPositionX[0], segmentPositionY[0] );
-        i++;
+        food.display();
+    }
+}
 
-        mvprintw( segmentPositionY[i], segmentPositionX[i], " " );
+bool Snake::move( Segment::Direction t_direction )
+{
+    m_segments.front().setPosition( m_segments.back().getPosition() );
+    m_segments.front().move( t_direction );
+    m_segments.front().setLook( SEGMENT );
 
-        mvprintw( y, x, "#" );
-        move( y, x );
+    std::rotate( m_segments.begin(), ++m_segments.begin(), m_segments.end() );
 
-        for( int j = 0; j < snakeLength; j++ )
+    if ( !collides( m_segments.back() ) )
+    {
+        for ( auto i = begin( *m_foods ); i != end( *m_foods ); ++i )
         {
-            segmentPositionX[i] = getx();
-            segmentPositionY[i] = gety();
+            if ( m_segments.back().collides( i->getPosition() ) )
+            {
+                grow( i->getPosition(), t_direction );
+                m_foods->erase( i );
+                makeFoods( m_foods, 1 );
+
+                break;
+            }
         }
 
-        if( x > getMaxX() )
-            x = -1;
-        else if( x < 0 )
-            x = getMaxX()+1;
+        return true;
+    }
 
-        if( y > getMaxY() )
-            y = -1;
-        else if( y < 0 )
-            y = getMaxY()+1;
+    return false;
+}
 
-        switch( direction )
+bool Snake::collides( const auto& t_segment ) const
+{
+    for ( auto it = begin( m_segments ); it != --end( m_segments ); ++it )
+    {
+        if ( it->getPosition() == t_segment.getPosition() )
         {
-        case 1:
-            if( mvinch( y, x+1 ) != '#' )
-            {
-                x++;
-                grow();
-            }else
-                gameOver();
-            break;
-        case -1:
-            if( mvinch( y, x-1 ) != '#' )
-            {
-                x--;
-                grow();
-            }else
-                gameOver();
-            break;
-        case -2:
-            if( mvinch( y+1, x ) != '#' )
-            {
-                y++;
-                grow();
-            }else
-                gameOver();
-            break;
-        case 2:
-            if( mvinch( y-1, x ) != '#' )
-            {
-                y--;
-                grow();
-            }else
-                gameOver();
-            break;
-        }
-
-        refresh();
-        napms(delay);
-
-        if( i == snakeLength ){
-            i = -1;
+            return true;
         }
     }
 
-    if( over == false )
-    {
-        nodelay(stdscr,FALSE);
+    return false;
+}
 
-        int oldDirection = direction;
+bool Snake::isOver() const
+{
+    return m_over;
+}
 
-        switch( Char )
-        {
-        case 'd':
-            direction = 1;
-            break;
-        case 'a':
-            direction = -1;
-            break;
-        case 's':
-            direction = -2;
-            break;
-        case 'w':
-            direction = 2;
-            break;
-        }
-
-        if( direction == -oldDirection )
-            direction = oldDirection;
-
-        movement();
-    }
+int Snake::getDelay() const
+{
+    return m_delay;
 }
